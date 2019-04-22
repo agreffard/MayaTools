@@ -3,6 +3,7 @@
 import maya.cmds as cmds
 from maya import OpenMayaUI as omui
 from shiboken2 import wrapInstance
+import json
 from PySide2 import QtGui, QtCore, QtWidgets
 
 def getMayaWindow():
@@ -30,26 +31,24 @@ class Synoptic(QtWidgets.QDialog):
 
         layout.addWidget(self.view)
         self.setLayout(layout)
+
+        with open('C:/agr/perso/dev/maya/kain.json', 'r') as f:
+            self.data = json.load(f)
+
         self.refreshAll()
 
-    def addImage(self):
-        pixmap = QtGui.QPixmap('C:/agr/perso/dev/maya/base.png')
+    def addImage(self, src):
+        pixmap = QtGui.QPixmap(src)
         self.scene.addPixmap(pixmap)
 
-    def addControls(self):
-        ControlButton(self, 10, 50, 'con_r_fk_wrist')
-        ControlButton(self, 80, 55, 'con_r_fk_elbow', size='medium')
-        ControlButton(self, 320, 50, 'con_l_fk_wrist')
-        ControlButton(self, 260, 55, 'con_l_fk_elbow', size='medium')
-        ControlButton(self, 164, 5, 'con_neck')
-        ControlButton(self, 164, 140, 'con_waist')
-        ControlButton(self, 160, 330, 'con_IK_r_leg', size='small')
-        ControlButton(self, 187, 330, 'con_IK_l_leg', size='small')
+    def addControls(self, controls):
+        for ctrl in controls:
+            ControlButton(self, ctrl['x'], ctrl['y'], ctrl['name'], ctrl['size'])
 
     def refreshAll(self):
         self.scene.clear()
-        self.addImage()
-        self.addControls()
+        self.addImage(self.data['background'])
+        self.addControls(self.data['controls'])
 
 class ControlButton(QtWidgets.QGraphicsItem):
     def __init__(self, parent, x=0, y=0, control=None, size='big'):

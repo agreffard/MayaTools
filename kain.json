@@ -1,0 +1,53 @@
+{
+  "background": "C:/agr/perso/dev/maya/base.png",
+  "controls": [
+    {
+      "name": "con_r_fk_wrist",
+      "x": 10,
+      "y": 50,
+      "size": "big"
+    },
+    {
+      "name": "con_r_fk_elbow",
+      "x": 80,
+      "y": 55,
+      "size": "medium"
+    },
+    {
+      "name": "con_l_fk_wrist",
+      "x": 320,
+      "y": 50,
+      "size": "big"
+    },
+    {
+      "name": "con_l_fk_elbow",
+      "x": 260,
+      "y": 55,
+      "size": "medium"
+    },
+    {
+      "name": "con_neck",
+      "x": 164,
+      "y": 5,
+      "size": "big"
+    },
+    {
+      "name": "con_waist",
+      "x": 164,
+      "y": 140,
+      "size": "big"
+    },
+    {
+      "name": "con_IK_r_leg",
+      "x": 160,
+      "y": 330,
+      "size": "small"
+    },
+    {
+      "name": "con_IK_l_leg",
+      "x": 187,
+      "y": 330,
+      "size": "small"
+    }
+  ]
+}
