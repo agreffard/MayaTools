@@ -1,4 +1,5 @@
 # cf https://www.youtube.com/watch?v=tVF62GoJ8dA
+# Kain character: https://free3d.com/3d-model/kain-77272.html
 
 import maya.cmds as cmds
 from maya import OpenMayaUI as omui
@@ -26,15 +27,15 @@ class Synoptic(QtWidgets.QDialog):
         self.hoveredPen.setColor(hoveredColor)
         self.brush = QtGui.QBrush(color)
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.scene = QtWidgets.QGraphicsScene()
         self.view = QtWidgets.QGraphicsView()
         self.view.setScene(self.scene)
 
-        layout.addWidget(self.view)
-        self.setLayout(layout)
+        self.layout.addWidget(self.view)
+        self.setLayout(self.layout)
 
         with open('C:/agr/perso/dev/maya/kain.json', 'r') as f:
             self.data = json.load(f)
@@ -45,18 +46,32 @@ class Synoptic(QtWidgets.QDialog):
         pixmap = QtGui.QPixmap(src)
         self.scene.addPixmap(pixmap)
 
-    def addControls(self, controls):
+    def addSelectionButtons(self, controls):
         for ctrl in controls:
-            ControlButton(self, ctrl['x'], ctrl['y'], ctrl['name'], ctrl['size'])
+            SelectionButton(self, ctrl['x'], ctrl['y'], ctrl['name'], ctrl['size'])
+
+    def addControlPanel(self):
+        self.controlPanel = ControlPanel(self, QtCore.Qt.Horizontal)
 
     def refreshAll(self):
         self.scene.clear()
         self.addImage(self.data['background'])
-        self.addControls(self.data['controls'])
+        self.addSelectionButtons(self.data['controls'])
+        self.addControlPanel()
 
-class ControlButton(QtWidgets.QGraphicsItem):
+class ControlPanel(QtWidgets.QGroupBox):
+    def __init__(self, parent, orientation, name='Parameter'):
+        super(ControlPanel, self).__init__(name, parent)
+        self.name = name
+        self.slider = QtWidgets.QSlider(orientation)
+        slidersLayout = QtWidgets.QVBoxLayout()
+        slidersLayout.addWidget(self.slider)
+        self.setLayout(slidersLayout)
+        parent.layout.addWidget(self)
+
+class SelectionButton(QtWidgets.QGraphicsItem):
     def __init__(self, parent, x=0, y=0, name=None, size='big'):
-        super(ControlButton, self).__init__()
+        super(SelectionButton, self).__init__()
         self.parent = parent
         sizePx = 20 if size == 'small' else 30 if size == 'medium' else 40
         self.globalRect = QtCore.QRectF(0, 0, sizePx, sizePx)
@@ -99,8 +114,12 @@ class ControlButton(QtWidgets.QGraphicsItem):
         self.update()
 
     def mousePressEvent(self, event):
+        selected = self.selected
         if self.name:
             cmds.select(self.name)
+            self.parent.controlPanel.init(self.name)
+        if selected:
+            cmds.setAttr(self.name+'.rotateY', 50)
 
 window = Synoptic()
 window.show()
