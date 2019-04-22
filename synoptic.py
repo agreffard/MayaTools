@@ -17,9 +17,13 @@ class Synoptic(QtWidgets.QDialog):
         self.setWindowTitle(title)
 
         color = QtGui.QColor(255, 243, 49)
+        hoveredColor = QtGui.QColor(0, 255, 100)
         self.pen = QtGui.QPen()
         self.pen.setWidth(2)
         self.pen.setColor(color)
+        self.hoveredPen = QtGui.QPen()
+        self.hoveredPen.setWidth(2)
+        self.hoveredPen.setColor(hoveredColor)
         self.brush = QtGui.QBrush(color)
 
         layout = QtWidgets.QVBoxLayout()
@@ -51,7 +55,7 @@ class Synoptic(QtWidgets.QDialog):
         self.addControls(self.data['controls'])
 
 class ControlButton(QtWidgets.QGraphicsItem):
-    def __init__(self, parent, x=0, y=0, control=None, size='big'):
+    def __init__(self, parent, x=0, y=0, name=None, size='big'):
         super(ControlButton, self).__init__()
         self.parent = parent
         sizePx = 20 if size == 'small' else 30 if size == 'medium' else 40
@@ -59,29 +63,44 @@ class ControlButton(QtWidgets.QGraphicsItem):
         self.setPos(x, y)
         self.parent.scene.addItem(self)
         self.setAcceptHoverEvents(1)
+        self.hovered = False
         self.selected = False
-        self.control = control
+        self.name = name
+        self.sJob = cmds.scriptJob(event=['SelectionChanged', self.updateSelection])
+
+    def __del__(self):
+        cmds.scriptJob(kill=self.sJob)
+
+    def updateSelection(self):
+        selection = cmds.ls(sl=True) or []
+        selected = self.name in selection
+        if self.selected != selected:
+            self.selected = selected
+            self.update()
 
     def boundingRect(self):
         return self.globalRect
 
     def paint(self, painter, option, widget):
+        if self.hovered or self.selected:
+            painter.setPen(self.parent.hoveredPen)
+        else:
+            painter.setPen(self.parent.pen)
         if self.selected:
             painter.setBrush(self.parent.brush)
-        painter.setPen(self.parent.pen)
         painter.drawEllipse(self.globalRect)
 
     def hoverEnterEvent(self, event):
-       self.selected = True
+       self.hovered = True
        self.update()
 
     def hoverLeaveEvent(self, event):
-        self.selected = False
+        self.hovered = False
         self.update()
 
     def mousePressEvent(self, event):
-        if self.control:
-            cmds.select(self.control)
+        if self.name:
+            cmds.select(self.name)
 
 window = Synoptic()
 window.show()
